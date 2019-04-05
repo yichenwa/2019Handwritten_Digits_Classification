@@ -57,13 +57,11 @@ def preprocess():
     # Split the training sets into two sets of 50000 randomly sampled training examples and 10000 validation examples. 
     # Your code here.
     train0 = mat.get('train0')
-    train_w=len(train0[0])
     all_examples=[]
     for i in range(10):
         trainname='train'+str(i)
         trainmatrix=mat.get(trainname)
         for trainrow in trainmatrix:
-            #all_exampls=np.append(all_exampls,trainrow)
             all_examples.append(trainrow)
     random_example = np.random.permutation(all_examples)
     S=random_example[:50000]
