@@ -202,7 +202,6 @@ def nnObjFunction(params, *args):
     w1 = np.array(params[0:n_hidden * (n_input + 1)].reshape((n_hidden, (n_input + 1))))
     w2 = np.array(params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1))))
     training_data = np.array(training_data)
-    obj_val = 0
 
     # Your code here
     #     print("w1 shape = ")
@@ -213,11 +212,11 @@ def nnObjFunction(params, *args):
     training_data_with_bias[:, :-1] = training_data
     #     print("training data with bias shape")
     #     print(training_data_with_bias.shape)
-    a1 = np.dot(w1, training_data_with_bias.T)
+    a1 = np.dot(training_data_with_bias, w1.T)
     a1 = sigmoid(a1)
-    a1_with_bias = np.ones((a1.shape[1], n_hidden + 1))
-    a1_with_bias[:, :-1] = a1.T
-    a2 = np.dot(w2, a1_with_bias.T).T
+    a1_with_bias = np.ones((a1.shape[0], a1.shape[1] + 1))
+    a1_with_bias[:, :-1] = a1
+    a2 = np.dot(a1_with_bias, w2.T)
     a2 = sigmoid(a2)
     #     print("a2 shape = ")
     #     print(a2.shape)
