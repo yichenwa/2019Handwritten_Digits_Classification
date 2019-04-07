@@ -152,7 +152,9 @@ def preprocess():
         FT.append(ft)
     test_data = np.array(FT, dtype=float)
 
-
+    train_data/=255
+    validation_data/=255
+    test_data/=255
 
     print('preprocess done')
 
