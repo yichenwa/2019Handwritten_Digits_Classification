@@ -30,6 +30,11 @@ def sigmoid(z):
     return 1./(1.+np.exp(-z)) # your code here
 
 
+def get_one_hot(targets, nb_classes):
+    res = np.eye(nb_classes)[np.array(targets).reshape(-1)]
+    return res.reshape(list(targets.shape)+[nb_classes])
+
+
 def preprocess():
     """ Input:
      Although this function doesn't have any input, you are required to load
@@ -175,8 +180,8 @@ def nnObjFunction(params, *args):
     %     in the vector represents the truth label of its corresponding image.
     % lambda: regularization hyper-parameter. This value is used for fixing the
     %     overfitting problem.
-       
-    % Output: 
+
+    % Output:
     % obj_val: a scalar value representing value of error function
     % obj_grad: a SINGLE vector of gradient value of error function
     % NOTE: how to compute obj_grad
@@ -186,31 +191,66 @@ def nnObjFunction(params, *args):
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % reshape 'params' vector into 2 matrices of weight w1 and w2
     % w1: matrix of weights of connections from input layer to hidden layers.
-    %     w1(i, j) represents the weight of connection from unit j in input 
+    %     w1(i, j) represents the weight of connection from unit j in input
     %     layer to unit i in hidden layer.
     % w2: matrix of weights of connections from hidden layer to output layers.
-    %     w2(i, j) represents the weight of connection from unit j in hidden 
+    %     w2(i, j) represents the weight of connection from unit j in hidden
     %     layer to unit i in output layer."""
 
     n_input, n_hidden, n_class, training_data, training_label, lambdaval = args
 
-    w1 = params[0:n_hidden * (n_input + 1)].reshape((n_hidden, (n_input + 1)))
-    w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
+    w1 = np.array(params[0:n_hidden * (n_input + 1)].reshape((n_hidden, (n_input + 1))))
+    w2 = np.array(params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1))))
+    training_data = np.array(training_data)
     obj_val = 0
 
     # Your code here
-    #
-    #
-    #
-    #
-    #
+    #     print("w1 shape = ")
+    #     print(w1.shape)
+    #     print("w2 shape = ")
+    #     print(w2.shape)
+    training_data_with_bias = np.ones((training_data.shape[0], n_input + 1))
+    training_data_with_bias[:, :-1] = training_data
+    #     print("training data with bias shape")
+    #     print(training_data_with_bias.shape)
+    a1 = np.dot(w1, training_data_with_bias.T)
+    a1 = sigmoid(a1)
+    a1_with_bias = np.ones((a1.shape[1], n_hidden + 1))
+    a1_with_bias[:, :-1] = a1.T
+    a2 = np.dot(w2, a1_with_bias.T).T
+    a2 = sigmoid(a2)
+    #     print("a2 shape = ")
+    #     print(a2.shape)
+    #     training_label = int(training_label)
+    train_label_hot = get_one_hot(training_label.astype(int), 10)
 
+    obj_val = np.sum(np.multiply(train_label_hot, np.log(a2)) + np.multiply((1.0 - train_label_hot), np.log(1.0 - a2)))
+    obj_val /= training_data.shape[0] * (-1)
 
+    obj_val_regularization = (lambdaval / (2 * training_label.shape[0])) * (
+                np.sum(np.square(w1)) + np.sum(np.square(w2)))
+    obj_val += obj_val_regularization
+
+    #     grad_w1 = np.zeros((w1.shape[0], w1.shape[1]))
+    #     grad_w2 = np.zeros((w2.shape[0], w2.shape[1]))
+
+    dl = (a2 - train_label_hot)
+    grad_w2 = np.dot(dl.T, a1_with_bias)
+    grad_w2 += (lambdaval * w2)
+    grad_w2 /= training_data.shape[0]
+    temp = np.dot(dl, w2)
+    temp = ((1 - a1_with_bias) * a1_with_bias) * temp
+    grad_w1 = np.dot(temp.T, training_data_with_bias)
+    grad_w1 = np.delete(grad_w1, n_hidden, 0)
+    grad_w1 += (lambdaval * w1)
+    grad_w1 /= training_data.shape[0]
+    #     print("grad_wx shape = ")
+    #     print(grad_w1.shape)
+    #     print(grad_w2.shape)
 
     # Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     # you would use code similar to the one below to create a flat array
-    # obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
-    obj_grad = np.array([])
+    obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()), 0)
 
     return (obj_val, obj_grad)
 
@@ -228,12 +268,20 @@ def nnPredict(w1, w2, data):
     %     layer to unit j in hidden layer.
     % data: matrix of data. Each row of this matrix represents the feature 
     %       vector of a particular image
-       
-    % Output: 
+
+    % Output:
     % label: a column vector of predicted labels"""
 
-    labels = np.array([])
     # Your code here
+    data_with_bias = np.ones((data.shape[0], data.shape[1] + 1))
+    data_with_bias[:, :-1] = data
+
+    a1 = sigmoid(np.dot(data_with_bias, w1.T))
+    a1_with_bias = np.ones((a1.shape[0], a1.shape[1] + 1))
+    a1_with_bias[:, :-1] = a1
+    a2 = sigmoid(np.dot(a1_with_bias, w2.T))
+
+    labels = np.argmax(a2, axis=1)
 
     return labels
 
