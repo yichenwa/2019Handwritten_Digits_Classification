@@ -116,8 +116,8 @@ def preprocess():
         for s in Sdata:
             features.append(s[i])
         standard_deviation=np.std(features)
-        #print(standard_deviation)
-        if standard_deviation==0:
+        # print(standard_deviation)
+        if standard_deviation < 1.0:
             F.append(i)
     print(len(F),F)                          # printout the F, it size is 70
 
