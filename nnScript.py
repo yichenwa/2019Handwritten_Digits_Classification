@@ -100,7 +100,7 @@ def preprocess():
         if y[i]<=1:
             F.append(i)
     print(len(F),F)
-    pickle.dump(F, f)
+    
     #Up to this step, we already get a train_data (size 784) and a list of cols need to be ignored (size around 70)
     #Our original method is rewrite a list and remove cols in F , BUT this time we will directly delete this columns when we create V and T
     #At first create a int list[0,1,2...,783] this is the original index list, remove ignored cols index from index_list
@@ -108,7 +108,7 @@ def preprocess():
     for i in range(len(Sdata[0])):
         if i not in F:
             index_list.append(i)
-    #print(len(index_list))
+    pickle.dump(index_list, f)
     new_order_index = np.array(index_list)
 
     train_data = train_data[:, new_order_index] #np.array[:,[order]] can make a new np.array with the order we want
