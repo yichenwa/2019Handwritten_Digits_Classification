@@ -2,7 +2,8 @@ import numpy as np
 from scipy.optimize import minimize
 from scipy.io import loadmat
 from math import sqrt
-
+import time
+import pickle#ADD for pickle
 
 def initializeWeights(n_in, n_out):
     """
@@ -96,9 +97,10 @@ def preprocess():
     y = np.std(train_data,axis=0)       #I found use np.array to calculate col's std is faster than list
     F=[]
     for i in range(len(y)):
-        if y[i]==0:
+        if y[i]<=1:
             F.append(i)
     print(len(F),F)
+    pickle.dump(F, f)
     #Up to this step, we already get a train_data (size 784) and a list of cols need to be ignored (size around 70)
     #Our original method is rewrite a list and remove cols in F , BUT this time we will directly delete this columns when we create V and T
     #At first create a int list[0,1,2...,783] this is the original index list, remove ignored cols index from index_list
@@ -319,6 +321,8 @@ def nnPredict(w1, w2, data):
 
 
 """**************Neural Network Script Starts here********************************"""
+f = open('params.pickle','wb')
+starttime = time.time()#FOR TIME
 
 train_data, train_label, validation_data, validation_label, test_data, test_label = preprocess()
 
@@ -341,7 +345,7 @@ initial_w2 = initializeWeights(n_hidden, n_class)
 initialWeights = np.concatenate((initial_w1.flatten(), initial_w2.flatten()), 0)
 
 # set the regularization hyper-parameter
-lambdaval = 0
+lambdaval = 5
 
 args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
 
@@ -379,3 +383,14 @@ predicted_label = nnPredict(w1, w2, test_data)
 # find the accuracy on Validation Dataset
 
 print('\n Test set Accuracy:' + str(100 * np.mean((predicted_label == test_label).astype(float))) + '%')
+
+endtime = time.time()
+print('\n Use time:' + str(endtime-starttime))
+
+
+pickle.dump(n_hidden,f)
+pickle.dump(w1,f)
+pickle.dump(w2,f)
+pickle.dump(lambdaval,f)
+f.close()
+f=open('params.pickle','rb')
