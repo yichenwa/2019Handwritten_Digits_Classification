@@ -104,11 +104,12 @@ def preprocess():
     #Up to this step, we already get a train_data (size 784) and a list of cols need to be ignored (size around 70)
     #Our original method is rewrite a list and remove cols in F , BUT this time we will directly delete this columns when we create V and T
     #At first create a int list[0,1,2...,783] this is the original index list, remove ignored cols index from index_list
+    global index_list
     index_list=[]
     for i in range(len(Sdata[0])):
         if i not in F:
             index_list.append(i)
-    pickle.dump(index_list, f)
+    # pickle.dump(index_list, f)
     new_order_index = np.array(index_list)
 
     train_data = train_data[:, new_order_index] #np.array[:,[order]] can make a new np.array with the order we want
@@ -321,7 +322,6 @@ def nnPredict(w1, w2, data):
 
 
 """**************Neural Network Script Starts here********************************"""
-f = open('params.pickle','wb')
 starttime = time.time()#FOR TIME
 
 train_data, train_label, validation_data, validation_label, test_data, test_label = preprocess()
@@ -387,10 +387,9 @@ print('\n Test set Accuracy:' + str(100 * np.mean((predicted_label == test_label
 endtime = time.time()
 print('\n Use time:' + str(endtime-starttime))
 
-
-pickle.dump(n_hidden,f)
-pickle.dump(w1,f)
-pickle.dump(w2,f)
-pickle.dump(lambdaval,f)
+f = open('params.pickle','wb')
+dictionary = {'index_list': index_list, 'n_hidden': n_hidden, 'w1': w1, 'w2': w2, 'lambdaval': lambdaval}
+pickle.dump(dictionary,f)
 f.close()
-f=open('params.pickle','rb')
+# f=open('params.pickle','rb')
+# print(pickle.load(f))
